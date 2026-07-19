@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useData } from '../context/DataContext';
+import { useState, useMemo } from 'react';
+import { useManagementLists } from '../hooks/useManagementLists';
+import { useMarkPaymentPaidMutation } from '../store/apiSlice';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getCurrentMonth, formatMonthYear, getMonthsList, formatDate } from '../utils/formatDate';
 import { generateWhatsAppLink } from '../utils/whatsappLink';
@@ -7,6 +8,11 @@ import societyConfig from '../config/society';
 import Modal from '../components/common/Modal';
 import StatusBadge from '../components/common/StatusBadge';
 import DataState from '../components/common/DataState';
+import {
+  getPaymentsForMonth,
+  getMonthlyStats,
+  getDefaulters,
+} from '../utils/financeDerived';
 import {
   ChevronLeft,
   ChevronRight,
@@ -32,7 +38,9 @@ const statusConfig = {
   partial: { border: 'border-l-blue-500',   bg: 'hover:bg-blue-50/50',   icon: CreditCard,  iconColor: 'text-blue-500',  ring: 'ring-blue-200' },
 };
 export default function Maintenance() {
-  const { getPaymentsForMonth, members, markAsPaid, getMonthlyStats, getDefaulters, isLoading, loadError, reloadData } = useData();
+  const { members, payments: allPayments, expenses, isLoading, loadError, reloadData } =
+    useManagementLists();
+  const [markPaidMut] = useMarkPaymentPaidMutation();
   const monthsList = getMonthsList(6);
 
   const [currentMonth, setCurrentMonth] = useState(getCurrentMonth());
@@ -46,9 +54,18 @@ export default function Maintenance() {
   const [transactionRef, setTransactionRef] = useState('');
   const [markError, setMarkError] = useState('');
 
-  const payments = getPaymentsForMonth(currentMonth);
-  const stats = getMonthlyStats(currentMonth);
-  const defaulters = getDefaulters(currentMonth);
+  const payments = useMemo(
+    () => getPaymentsForMonth(allPayments, currentMonth),
+    [allPayments, currentMonth]
+  );
+  const stats = useMemo(
+    () => getMonthlyStats(allPayments, expenses, currentMonth),
+    [allPayments, expenses, currentMonth]
+  );
+  const defaulters = useMemo(
+    () => getDefaulters(allPayments, members, currentMonth),
+    [allPayments, members, currentMonth]
+  );
   const totalFlats = payments.length;
 
   // Month navigation
@@ -85,12 +102,15 @@ export default function Maintenance() {
     if (!selectedPayment) return;
     setMarkError('');
     try {
-      await markAsPaid(selectedPayment.id, {
-        paidAmount: paymentAmount,
-        paidDate: paymentDate,
-        paymentMode,
-        transactionRef,
-      });
+      await markPaidMut({
+        id: selectedPayment.id,
+        payload: {
+          paidAmount: paymentAmount,
+          paidDate: paymentDate,
+          paymentMode,
+          transactionRef,
+        },
+      }).unwrap();
       setShowMarkPaidModal(false);
       setSelectedPayment(null);
     } catch (error) {

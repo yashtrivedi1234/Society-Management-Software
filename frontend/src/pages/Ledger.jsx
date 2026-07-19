@@ -1,15 +1,16 @@
 import { useState, useMemo } from 'react';
-import { useData } from '../context/DataContext';
+import { useManagementLists } from '../hooks/useManagementLists';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatDate, getCurrentMonth, getMonthsList, formatMonthYear } from '../utils/formatDate';
 import { getCategoryById } from '../data/categories';
+import { getLedgerData } from '../utils/financeDerived';
 import societyConfig from '../config/society';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Download, Search, ArrowUpRight, ArrowDownRight, Wallet, Scale } from 'lucide-react';
 
 export default function Ledger() {
-  const { getLedgerData } = useData();
+  const { payments, expenses } = useManagementLists();
 
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [typeFilter, setTypeFilter] = useState('all');
@@ -17,7 +18,10 @@ export default function Ledger() {
 
   const months = useMemo(() => getMonthsList(6), []);
 
-  const ledgerData = useMemo(() => getLedgerData(selectedMonth), [getLedgerData, selectedMonth]);
+  const ledgerData = useMemo(
+    () => getLedgerData(payments, expenses, selectedMonth),
+    [payments, expenses, selectedMonth]
+  );
 
   const displayedTransactions = useMemo(() => {
     if (!ledgerData?.transactions) return [];

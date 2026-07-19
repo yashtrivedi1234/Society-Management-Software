@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { useData } from '../context/DataContext';
+import { useManagementLists } from '../hooks/useManagementLists';
 import Modal from '../components/common/Modal';
 import DataState from '../components/common/DataState';
 import { isValidEmail, isValidFlatNumber, isValidPhone } from '../utils/validation';
 import { isLiveMode } from '../config/appMode';
-import { useCreateMemberLoginMutation } from '../store/apiSlice';
+import {
+  useCreateMemberMutation,
+  useUpdateMemberMutation,
+  useCreateMemberLoginMutation,
+} from '../store/apiSlice';
 import { Plus, Search, Users, Phone, Mail, Grid, List, Home, KeyRound, Eye, EyeOff, Pencil } from 'lucide-react';
 
 const emptyForm = {
@@ -19,7 +23,9 @@ const emptyForm = {
   loginPassword: '',
 };
 export default function Members() {
-  const { members, addMember, updateMember, isLoading, loadError, reloadData } = useData();
+  const { members, isLoading, loadError, reloadData } = useManagementLists();
+  const [createMemberMut] = useCreateMemberMutation();
+  const [updateMemberMut] = useUpdateMemberMutation();
   const [search, setSearch] = useState('');
   const [blockFilter, setBlockFilter] = useState('All');
   const [viewMode, setViewMode] = useState('table');
@@ -78,14 +84,17 @@ export default function Members() {
     setEditBusy(true);
     setEditError('');
     try {
-      await updateMember(editTarget.id, {
-        name: editForm.name.trim(),
-        phone: editForm.phone,
-        email: editForm.email,
-        isOwner: editForm.isOwner,
-        familyMembers: Number(editForm.familyMembers || 1),
-        status: editForm.status,
-      });
+      await updateMemberMut({
+        id: editTarget.id,
+        payload: {
+          name: editForm.name.trim(),
+          phone: editForm.phone,
+          email: editForm.email,
+          isOwner: editForm.isOwner,
+          familyMembers: Number(editForm.familyMembers || 1),
+          status: editForm.status,
+        },
+      }).unwrap();
       closeEdit();
     } catch (err) {
       setEditError(err?.data?.message || 'Failed to update member');
@@ -155,10 +164,17 @@ export default function Members() {
       return;
     }
     try {
-      await addMember({
-        ...form,
+      await createMemberMut({
+        flatNumber: form.flatNumber,
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        isOwner: form.isOwner,
         familyMembers: Number(form.familyMembers || 1),
-      });
+        status: 'active',
+        createLogin: Boolean(form.createLogin),
+        loginPassword: form.createLogin ? form.loginPassword : undefined,
+      }).unwrap();
       setShowModal(false);
       setForm(emptyForm);
       setFormError('');

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { TrendingUp, PieChart, AlertTriangle, Download, FileText } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { useManagementLists } from '../hooks/useManagementLists';
 import societyConfig from '../config/society';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatMonthYear, getCurrentMonth, getMonthsList } from '../utils/formatDate';
@@ -23,7 +23,7 @@ function downloadCsv(filename, rows) {
 }
 
 export default function Reports() {
-  const { members, payments, expenses } = useData();
+  const { members, payments, expenses } = useManagementLists();
   const [month, setMonth] = useState(getCurrentMonth());
 
   // ----- Collection trend (last 6 months) -----

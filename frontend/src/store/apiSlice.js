@@ -113,7 +113,7 @@ export const api = createApi({
 
     // ---------- Payments ----------
     getPayments: builder.query({ queryFn: (month) => run(payments.listPaymentsApi(month)), providesTags: ['Payment'] }),
-    markPaymentPaid: builder.mutation({ queryFn: ({ id, payload }) => run(payments.markPaymentPaidApi(id, payload)), invalidatesTags: ['Payment', 'Compliance'] }),
+    markPaymentPaid: builder.mutation({ queryFn: ({ id, payload }) => run(payments.markPaymentPaidApi(id, payload)), invalidatesTags: ['Payment', 'Compliance', 'Invoice'] }),
 
     // ---------- Expenses ----------
     getExpenses: builder.query({ queryFn: (month) => run(expenses.listExpensesApi(month)), providesTags: ['Expense'] }),

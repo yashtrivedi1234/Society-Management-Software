@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient';
 
 // Server-side aggregated reports (admin/accountant only). Exposed for API/mobile consumers;
-// the web Reports page can also derive these client-side from DataContext in demo mode.
+// the web Reports page can also derive these client-side from RTK list queries in demo mode.
 
 export async function getCollectionTrendApi({ month, months = 6 } = {}) {
   const params = new URLSearchParams();

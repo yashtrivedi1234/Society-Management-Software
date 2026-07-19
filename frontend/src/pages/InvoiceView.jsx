@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useData } from '../context/DataContext';
+import { useManagementLists } from '../hooks/useManagementLists';
 import { isLiveMode } from '../config/appMode';
 import { useGetInvoiceQuery } from '../store/apiSlice';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -13,9 +13,9 @@ import { ArrowLeft, Download, Printer } from 'lucide-react';
 export default function InvoiceView() {
   const { flatNumber, month } = useParams();
   const navigate = useNavigate();
-  const { members, payments } = useData();
+  const { members, payments } = useManagementLists();
 
-  // Live: fetch the server-built invoice via RTK Query. Demo: fall back to DataContext.
+  // Live: fetch the server-built invoice via RTK Query. Demo: fall back to list queries.
   const { data: invoiceData } = useGetInvoiceQuery({ flatNumber, month }, { skip: !isLiveMode });
   const member = invoiceData?.member || members.find((m) => m.flatNumber === flatNumber);
   const payment = invoiceData?.payment || payments.find((p) => p.flatNumber === flatNumber && p.month === month);

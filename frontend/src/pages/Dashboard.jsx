@@ -5,12 +5,13 @@ import {
   MessageCircle, ArrowUpRight, ArrowDownRight,
   CreditCard, Receipt, Bell, UserCheck,
 } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { useManagementLists } from '../hooks/useManagementLists';
 import { formatCurrency } from '../utils/formatCurrency';
 import { getCurrentMonth, formatMonthYear, getMonthsList, formatDate } from '../utils/formatDate';
 import { generateWhatsAppLink } from '../utils/whatsappLink';
 import societyConfig from '../config/society';
 import { getCategoryById } from '../data/categories';
+import { getMonthlyStats, getDefaulters } from '../utils/financeDerived';
 
 const statCardConfig = [
   {
@@ -154,20 +155,23 @@ const quickActions = [
 ];
 
 export default function Dashboard() {
-  const { getMonthlyStats, getDefaulters, expenses, payments } = useData();
+  const { expenses, payments, members } = useManagementLists();
   const navigate = useNavigate();
   const currentMonth = getCurrentMonth();
-  const stats = useMemo(() => getMonthlyStats(currentMonth), [currentMonth, getMonthlyStats]);
+  const stats = useMemo(
+    () => getMonthlyStats(payments, expenses, currentMonth),
+    [payments, expenses, currentMonth]
+  );
 
   const barChartData = useMemo(() => {
     return getMonthsList(6).reverse().map((m) => {
-      const s = getMonthlyStats(m);
+      const s = getMonthlyStats(payments, expenses, m);
       const [, mo] = m.split('-');
       const [y] = m.split('-');
       const label = new Date(parseInt(y), parseInt(mo) - 1).toLocaleString('en-IN', { month: 'short' });
       return { name: label, Collected: s.totalCollected, Expenses: s.totalExpenses };
     });
-  }, [getMonthlyStats]);
+  }, [payments, expenses]);
 
   const pieChartData = useMemo(() => {
     const monthExpenses = expenses.filter((e) => e.date.startsWith(currentMonth));
@@ -191,7 +195,10 @@ export default function Dashboard() {
     return [...paid, ...exp].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
   }, [payments, expenses]);
 
-  const defaulters = useMemo(() => getDefaulters(currentMonth), [currentMonth, getDefaulters]);
+  const defaulters = useMemo(
+    () => getDefaulters(payments, members, currentMonth),
+    [payments, members, currentMonth]
+  );
 
   return (
     <div className="space-y-6 animate-fadeIn">

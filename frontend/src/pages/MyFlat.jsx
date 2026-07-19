@@ -4,11 +4,11 @@ import {
   Bell, FileText, UserCheck, Download, Pin, ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
 import { isLiveMode } from '../config/appMode';
 import societyConfig from '../config/society';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatDate, formatMonthYear, getCurrentMonth } from '../utils/formatDate';
+import { normalizeMember, normalizePayment } from '../utils/financeDerived';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Modal from '../components/common/Modal';
@@ -17,6 +17,7 @@ import { useToast } from '../hooks/useToast';
 import {
   useGetMySummaryQuery, useGetMyPaymentsQuery, useGetMyComplaintsQuery, useCreateMyComplaintMutation,
   useGetMyNoticesQuery, useGetMyDocumentsQuery, useGetMyVisitorsQuery, usePreApproveVisitorMutation,
+  useGetMembersQuery, useGetPaymentsQuery,
 } from '../store/apiSlice';
 
 const statusStyles = {
@@ -64,7 +65,6 @@ function deriveDemoView(members, payments) {
 
 export default function MyFlat() {
   const { user } = useAuth();
-  const { members, payments } = useData();
   const { toast, showToast, clearToast } = useToast();
 
   const [showModal, setShowModal] = useState(false);
@@ -80,7 +80,16 @@ export default function MyFlat() {
   const { data: visitors = [] } = useGetMyVisitorsQuery(undefined, { skip: !live });
   const [preApproveVisitor] = usePreApproveVisitorMutation();
 
-  const demoView = useMemo(() => (live ? null : deriveDemoView(members, payments)), [live, members, payments]);
+  // Demo mode: society lists via RTK (services return in-memory data when not live).
+  const { data: demoMembersRaw = [] } = useGetMembersQuery(undefined, { skip: live });
+  const { data: demoPaymentsRaw = [] } = useGetPaymentsQuery(undefined, { skip: live });
+  const demoMembers = useMemo(() => demoMembersRaw.map(normalizeMember), [demoMembersRaw]);
+  const demoPayments = useMemo(() => demoPaymentsRaw.map(normalizePayment), [demoPaymentsRaw]);
+
+  const demoView = useMemo(
+    () => (live ? null : deriveDemoView(demoMembers, demoPayments)),
+    [live, demoMembers, demoPayments]
+  );
   const [demoComplaints, setDemoComplaints] = useState([]);
 
   // Pay Now (UPI) + visitor pre-approval modal state

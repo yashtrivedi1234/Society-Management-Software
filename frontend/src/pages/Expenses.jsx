@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useData } from '../context/DataContext';
+import { useManagementLists } from '../hooks/useManagementLists';
+import { useCreateExpenseMutation, useDeleteExpenseMutation } from '../store/apiSlice';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatDate } from '../utils/formatDate';
 import { expenseCategories, getCategoryById } from '../data/categories';
@@ -27,7 +28,9 @@ const emptyForm = {
 };
 
 export default function Expenses() {
-  const { expenses, addExpense, deleteExpense, isLoading, loadError, reloadData } = useData();
+  const { expenses, isLoading, loadError, reloadData } = useManagementLists();
+  const [createExpenseMut] = useCreateExpenseMutation();
+  const [deleteExpenseMut] = useDeleteExpenseMutation();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -121,17 +124,31 @@ export default function Expenses() {
       setFormErrors((prev) => ({ ...prev, amount: 'Valid amount is required' }));
       return;
     }
-    addExpense({
-      ...formData,
+    createExpenseMut({
+      date: formData.date,
+      category: formData.category,
+      description: formData.description,
       amount: Number(formData.amount),
+      paidTo: formData.paidTo,
+      paymentMode: formData.paymentMode || 'upi',
       receiptNumber: formData.receiptNumber || `RCP-${Date.now()}`,
     })
-      .then(() => setShowAddModal(false))
-      .catch((error) => setFormErrors((prev) => ({ ...prev, description: error?.data?.message || 'Failed to save expense' })));
+      .unwrap()
+      .then(() => {
+        setShowAddModal(false);
+        setFormData(emptyForm);
+        setFormErrors({});
+      })
+      .catch((error) =>
+        setFormErrors((prev) => ({
+          ...prev,
+          description: error?.data?.message || 'Failed to save expense',
+        }))
+      );
   };
 
   const confirmDelete = () => {
-    if (deleteTarget) deleteExpense(deleteTarget);
+    if (deleteTarget) deleteExpenseMut(deleteTarget);
     setDeleteTarget(null);
   };
 

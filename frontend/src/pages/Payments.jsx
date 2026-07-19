@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useData } from '../context/DataContext';
+import { useManagementLists } from '../hooks/useManagementLists';
+import { useMarkPaymentPaidMutation } from '../store/apiSlice';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatDate, getCurrentMonth, getMonthsList, formatMonthYear } from '../utils/formatDate';
 import { generateWhatsAppLink } from '../utils/whatsappLink';
@@ -8,6 +9,7 @@ import Modal from '../components/common/Modal';
 import StatusBadge from '../components/common/StatusBadge';
 import DataState from '../components/common/DataState';
 import { isPositiveAmount } from '../utils/validation';
+import { getPaymentsForMonth, getMonthlyStats } from '../utils/financeDerived';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, MessageCircle, FileText, CreditCard, Download } from 'lucide-react';
 
@@ -21,7 +23,8 @@ const modeLabels = {
   cheque: 'Cheque',
 };
 export default function Payments() {
-  const { payments, markAsPaid, getPaymentsForMonth, getMonthlyStats, isLoading, loadError, reloadData } = useData();
+  const { payments, expenses, isLoading, loadError, reloadData } = useManagementLists();
+  const [markPaidMut] = useMarkPaymentPaidMutation();
   const navigate = useNavigate();
 
   const months = useMemo(() => getMonthsList(6), []);
@@ -43,7 +46,7 @@ export default function Payments() {
 
   // Filter payments
   const filtered = useMemo(() => {
-    let result = getPaymentsForMonth(selectedMonth);
+    let result = getPaymentsForMonth(payments, selectedMonth);
 
     if (statusFilter !== 'all') {
       result = result.filter((p) => p.status === statusFilter);
@@ -59,10 +62,13 @@ export default function Payments() {
     }
 
     return result;
-  }, [payments, selectedMonth, statusFilter, searchQuery, getPaymentsForMonth]);
+  }, [payments, selectedMonth, statusFilter, searchQuery]);
 
   // Stats
-  const stats = useMemo(() => getMonthlyStats(selectedMonth), [payments, selectedMonth, getMonthlyStats]);
+  const stats = useMemo(
+    () => getMonthlyStats(payments, expenses, selectedMonth),
+    [payments, expenses, selectedMonth]
+  );
 
   // Pagination
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -96,12 +102,15 @@ export default function Payments() {
       return;
     }
     try {
-      await markAsPaid(markPaidTarget.id, {
-        paidAmount: amount,
-        paidDate: payForm.paidDate,
-        paymentMode: payForm.paymentMode,
-        transactionRef: payForm.transactionRef,
-      });
+      await markPaidMut({
+        id: markPaidTarget.id,
+        payload: {
+          paidAmount: amount,
+          paidDate: payForm.paidDate,
+          paymentMode: payForm.paymentMode,
+          transactionRef: payForm.transactionRef,
+        },
+      }).unwrap();
       setMarkPaidTarget(null);
       setMarkPaidError('');
     } catch (error) {
