@@ -28,10 +28,13 @@ import { attachSocietyContext } from './middlewares/society.js';
 import { auditLogger } from './middlewares/auditLogger.js';
 import { sanitizeMongo } from './middlewares/sanitize.js';
 import { rateLimit } from './middlewares/rateLimit.js';
+import { ensureDemoUsers } from './bootstrap/demoUsers.js';
 
 const app = express();
 
 let dbConnectPromise = null;
+let demoUsersPromise = null;
+
 function ensureDatabase() {
   if (mongoose.connection.readyState === 1) return Promise.resolve();
   if (!dbConnectPromise) {
@@ -41,6 +44,20 @@ function ensureDatabase() {
     });
   }
   return dbConnectPromise;
+}
+
+function ensureDemoData() {
+  if (!demoUsersPromise) {
+    demoUsersPromise = ensureDemoUsers()
+      .then((emails) => {
+        console.log(`Demo users ready (${emails.length})`);
+      })
+      .catch((err) => {
+        demoUsersPromise = null;
+        console.error('Demo user bootstrap failed:', err.message || err);
+      });
+  }
+  return demoUsersPromise;
 }
 
 app.use(helmet());
@@ -77,6 +94,8 @@ app.use(auditLogger);
 app.use(async (req, res, next) => {
   try {
     await ensureDatabase();
+    // ponytail: ensure demo logins exist on cold start so client demos never 401 on empty DB
+    await ensureDemoData();
     next();
   } catch {
     res.status(503).json({ message: 'Database connection unavailable' });

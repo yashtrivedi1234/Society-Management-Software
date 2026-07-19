@@ -48,12 +48,16 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     if (isLiveMode) {
-      const res = await loginWithApi(username, password);
-      if (res?.user) {
-        setUser(res.user);
-        return { success: true };
+      try {
+        const res = await loginWithApi(username, password);
+        if (res?.user) {
+          setUser(res.user);
+          return { success: true };
+        }
+        return { success: false, error: 'Invalid email or password' };
+      } catch (err) {
+        return { success: false, error: err?.message || 'Invalid email or password' };
       }
-      return { success: false, error: 'Invalid email or password' };
     }
 
     // Demo sandbox only (no backend). Fixed, clearly-fake logins that unlock the local demo
