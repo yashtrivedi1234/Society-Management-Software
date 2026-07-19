@@ -29,6 +29,7 @@ import { auditLogger } from './middlewares/auditLogger.js';
 import { sanitizeMongo } from './middlewares/sanitize.js';
 import { rateLimit } from './middlewares/rateLimit.js';
 import { ensureDemoUsers } from './bootstrap/demoUsers.js';
+import { ensureDemoDataset } from './bootstrap/demoDataset.js';
 
 const app = express();
 
@@ -48,14 +49,14 @@ function ensureDatabase() {
 
 function ensureDemoData() {
   if (!demoUsersPromise) {
-    demoUsersPromise = ensureDemoUsers()
-      .then((emails) => {
-        console.log(`Demo users ready (${emails.length})`);
-      })
-      .catch((err) => {
-        demoUsersPromise = null;
-        console.error('Demo user bootstrap failed:', err.message || err);
-      });
+    demoUsersPromise = (async () => {
+      const emails = await ensureDemoUsers();
+      const dataset = await ensureDemoDataset();
+      console.log(`Demo ready: ${emails.length} users, ${dataset.members} members (${dataset.month})`);
+    })().catch((err) => {
+      demoUsersPromise = null;
+      console.error('Demo bootstrap failed:', err.message || err);
+    });
   }
   return demoUsersPromise;
 }

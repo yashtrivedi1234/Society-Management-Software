@@ -52,12 +52,18 @@ async function upsertUser({ role, name, email, password, flatNumber, memberId })
 }
 
 export async function ensureDemoUsers() {
-  const memberRecord = await upsertMember('A-101', 'Demo Member', 'member@greenvalley.demo');
+  // A-101 is the resident portal demo flat (Rajesh / member@greenvalley.demo).
+  const memberRecord = await upsertMember('A-101', 'Rajesh Sharma', 'member@greenvalley.demo');
 
   const created = [];
   for (const account of DEMO_ACCOUNTS) {
     const memberId = account.role === 'member' ? memberRecord._id : null;
-    const user = await upsertUser({ ...account, memberId });
+    const user = await upsertUser({
+      ...account,
+      name: account.role === 'member' ? 'Rajesh Sharma' : account.name,
+      flatNumber: account.role === 'member' ? 'A-101' : account.flatNumber,
+      memberId,
+    });
     created.push(user.email);
   }
   return created;
