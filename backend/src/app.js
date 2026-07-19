@@ -56,9 +56,16 @@ function isAllowedOrigin(origin) {
 }
 app.use(cors({
   origin(origin, callback) {
-    callback(null, isAllowedOrigin(origin));
+    if (isAllowedOrigin(origin)) {
+      // Reflect the request origin so browsers get a concrete Allow-Origin header.
+      callback(null, origin || true);
+      return;
+    }
+    callback(null, false);
   },
   credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-society-id'],
 }));
 
 app.use(express.json({ limit: '100kb' }));
@@ -80,7 +87,7 @@ app.use(async (req, res, next) => {
 app.use('/api', rateLimit({ windowMs: 60 * 1000, max: 300 }));
 
 app.get('/health', (req, res) => {
-  res.json({ ok: true, service: 'clave-society-backend' });
+  res.json({ ok: true, service: 'society-manager-backend' });
 });
 
 app.use('/api/v1/auth', authRoutes);

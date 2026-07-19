@@ -18,7 +18,8 @@ import {
 
 // Demo fallback only: the demo member login isn't linked to a flat the way a live member is.
 const MEMBER_FLAT_BY_EMAIL = {
-  'member@clave.demo': 'A-101',
+  'member@greenvalley.demo': 'A-101',
+  'demo-member': 'A-101',
 };
 
 export default function GovernanceHub() {

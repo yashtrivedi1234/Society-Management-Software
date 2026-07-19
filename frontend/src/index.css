@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Clave Society — trust teal (real-estate) brand; remaps Tailwind blue so existing UI picks it up */
+/* Society Manager — trust teal brand; remaps Tailwind blue so existing UI picks it up */
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 

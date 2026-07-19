@@ -13,32 +13,33 @@ import {
   Shield,
   MessageSquare,
   CalendarDays,
-  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import societyConfig from '../config/society';
 import { isLiveMode } from '../config/appMode';
 
 const features = [
-  { icon: BarChart3, title: 'Live dashboard', desc: 'Collections, expenses & balance at a glance' },
-  { icon: FileText, title: 'Smart invoicing', desc: 'Maintenance bills & WhatsApp reminders' },
-  { icon: Users, title: 'Visitor gate', desc: 'Guests, deliveries & domestic help logs' },
-  { icon: Shield, title: 'Complaints', desc: 'Raise, assign & close tickets cleanly' },
-  { icon: MessageSquare, title: 'Notice board', desc: 'Broadcast updates to every flat' },
-  { icon: CalendarDays, title: 'Amenities', desc: 'Book clubhouse, gym & guest rooms' },
+  { icon: BarChart3, title: 'Finance dashboard', desc: 'Collections, expenses, pending dues & net balance' },
+  { icon: FileText, title: 'Maintenance & invoices', desc: 'Monthly bills, payment tracking & WhatsApp reminders' },
+  { icon: Users, title: 'Members & visitors', desc: 'Flat directory, guest entry & domestic help logs' },
+  { icon: Shield, title: 'Complaints & ops', desc: 'Helpdesk tickets, staff, parking & security alerts' },
+  { icon: MessageSquare, title: 'Notices & governance', desc: 'Announcements, polls, meetings & RSVPs' },
+  { icon: CalendarDays, title: 'Facility booking', desc: 'Clubhouse, sports courts & amenity slots' },
 ];
 
-// Demo sandbox only — live mode always authenticates against the DB via /auth/login.
-function demoAccounts() {
-  if (isLiveMode) return [];
-  return [
-    { role: 'Admin', username: 'demo-admin', password: 'demo' },
-    { role: 'Member', username: 'demo-member', password: 'demo' },
-  ];
-}
+const liveDemoAccounts = [
+  { role: 'Admin', username: 'admin@greenvalley.demo', password: 'Admin@123', hint: 'Full RWA control' },
+  { role: 'Accountant', username: 'accountant@greenvalley.demo', password: 'Account@123', hint: 'Finance focus' },
+  { role: 'Member', username: 'member@greenvalley.demo', password: 'Member@123', hint: 'Resident portal' },
+];
+
+const offlineDemoAccounts = [
+  { role: 'Admin', username: 'demo-admin', password: 'demo', hint: 'Full RWA control' },
+  { role: 'Member', username: 'demo-member', password: 'demo', hint: 'Resident portal' },
+];
 
 export default function Login() {
-  const accounts = demoAccounts();
+  const accounts = isLiveMode ? liveDemoAccounts : offlineDemoAccounts;
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -75,7 +76,6 @@ export default function Login() {
 
   return (
     <div className="flex min-h-dvh bg-teal-50/40">
-      {/* Brand plane — client-facing first impression */}
       <div className="hidden lg:flex lg:w-[54%] relative overflow-hidden bg-gradient-to-br from-teal-950 via-teal-800 to-sky-900">
         <div
           className="absolute inset-0 opacity-[0.35]"
@@ -96,8 +96,7 @@ export default function Login() {
         <div className="relative z-10 flex flex-col justify-between w-full px-12 py-12 xl:px-16">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-teal-100">
-              <Sparkles className="w-3.5 h-3.5" />
-              Client demo · {societyConfig.shortName}
+              Sample society · {societyConfig.name}
             </div>
             <div className="mt-8 flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center backdrop-blur-sm">
@@ -111,7 +110,8 @@ export default function Login() {
               </div>
             </div>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-teal-100/75">
-              One place for {societyConfig.name} — maintenance, visitors, notices, and RWA accounts.
+              Software for residential societies and RWAs — collect maintenance, track expenses,
+              manage visitors, resolve complaints, and keep residents informed from one place.
             </p>
           </div>
 
@@ -131,13 +131,19 @@ export default function Login() {
             })}
           </div>
 
-          <p className="mt-10 text-xs text-teal-200/50">
-            Powered by <span className="font-semibold text-teal-100/80">{societyConfig.companyName}</span>
-          </p>
+          <div className="mt-10 max-w-xl rounded-xl border border-white/10 bg-black/20 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-teal-200/80 mb-2">
+              What to explore in this demo
+            </p>
+            <ol className="space-y-1.5 text-xs text-teal-100/75 list-decimal list-inside leading-relaxed">
+              <li><span className="text-white font-medium">Admin</span> — dashboard, maintenance collection, members, visitors</li>
+              <li><span className="text-white font-medium">Accountant</span> — expenses, ledger, payments, reports</li>
+              <li><span className="text-white font-medium">Member</span> — My Flat portal, notices, raise complaints</li>
+            </ol>
+          </div>
         </div>
       </div>
 
-      {/* Sign-in */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm animate-fadeIn">
           <div className="lg:hidden flex flex-col items-center mb-8">
@@ -149,31 +155,30 @@ export default function Login() {
           </div>
 
           <h1 className="text-2xl font-bold text-teal-950 text-center lg:text-left">
-            Welcome back
+            Sign in to the demo
           </h1>
-          <p className="text-sm text-teal-800/60 text-center lg:text-left mt-1 mb-6">
-            Sign in to manage {societyConfig.name}
+          <p className="text-sm text-teal-800/60 text-center lg:text-left mt-1 mb-5">
+            Managing sample data for {societyConfig.name}
           </p>
 
-          {accounts.length > 0 && (
-            <div className="mb-5 rounded-xl border border-teal-200/80 bg-white p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-teal-700/60 mb-2">
-                Quick demo login
-              </p>
-              <div className="flex gap-2">
-                {accounts.map((account) => (
-                  <button
-                    key={account.role}
-                    type="button"
-                    onClick={() => fillAccount(account)}
-                    className="flex-1 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2.5 text-sm font-semibold text-teal-800 transition-colors hover:bg-teal-100"
-                  >
-                    {account.role}
-                  </button>
-                ))}
-              </div>
+          <div className="mb-5 rounded-xl border border-teal-200/80 bg-white p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-teal-700/60 mb-2">
+              Try a role
+            </p>
+            <div className="space-y-2">
+              {accounts.map((account) => (
+                <button
+                  key={account.role}
+                  type="button"
+                  onClick={() => fillAccount(account)}
+                  className="w-full flex items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2.5 text-left transition-colors hover:bg-teal-100"
+                >
+                  <span className="text-sm font-semibold text-teal-900">{account.role}</span>
+                  <span className="text-[11px] text-teal-700/70">{account.hint}</span>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
           <form
             onSubmit={handleSubmit}
@@ -192,7 +197,7 @@ export default function Login() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder={isLiveMode ? 'admin@clave.demo' : 'demo-admin'}
+                  placeholder={isLiveMode ? 'admin@greenvalley.demo' : 'demo-admin'}
                   autoComplete={isLiveMode ? 'email' : 'username'}
                   required
                   className="w-full min-h-11 pl-10 pr-4 py-2.5 bg-white border border-teal-200 rounded-lg text-sm text-teal-950 placeholder:text-teal-700/35 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-colors"
@@ -245,22 +250,10 @@ export default function Login() {
                   Signing in...
                 </>
               ) : (
-                'Sign In'
+                'Enter demo'
               )}
             </button>
           </form>
-
-          <p className="mt-8 text-center text-xs text-teal-800/45">
-            {societyConfig.productName} by{' '}
-            <a
-              href={societyConfig.companyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-teal-700 font-medium hover:underline"
-            >
-              {societyConfig.companyName}
-            </a>
-          </p>
         </div>
       </div>
     </div>

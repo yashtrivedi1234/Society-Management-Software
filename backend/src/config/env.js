@@ -20,10 +20,19 @@ if (process.env.NODE_ENV === 'production') {
 
 // CORS_ORIGIN may be a single origin or a comma-separated allowlist, e.g.
 // "https://my-app.vercel.app,http://localhost:5173". Each entry is matched exactly.
-const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
+const builtinOrigins = [
+  'http://localhost:5173',
+  'https://society-management-software.vercel.app',
+];
+const corsOrigins = [
+  ...new Set([
+    ...builtinOrigins,
+    ...(process.env.CORS_ORIGIN || '')
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
+  ]),
+];
 
 export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -32,10 +41,11 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   corsOrigins,
-  // Optional regex (string) to also allow dynamic origins like Vercel preview URLs,
-  // e.g. CORS_ORIGIN_REGEX="^https://society-management-system-.*\\.vercel\\.app$"
-  corsOriginRegex: process.env.CORS_ORIGIN_REGEX || '',
+  // Allow this project's Vercel production + preview URLs by default.
+  corsOriginRegex:
+    process.env.CORS_ORIGIN_REGEX ||
+    '^https://society-management-software([a-z0-9-]*)?\\.vercel\\.app$',
   maintenanceDueDay: Number(process.env.MAINTENANCE_DUE_DAY || 10),
   lateFeePerDay: Number(process.env.LATE_FEE_PER_DAY || 50),
-  paymentGatewayBaseUrl: process.env.PAYMENT_GATEWAY_BASE_URL || 'https://payments.clave.local/pay',
+  paymentGatewayBaseUrl: process.env.PAYMENT_GATEWAY_BASE_URL || 'https://payments.demo.local/pay',
 };

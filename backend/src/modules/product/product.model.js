@@ -4,7 +4,7 @@ const societySettingSchema = new mongoose.Schema(
   {
     societyId: { type: String, required: true, default: 'default', unique: true, index: true },
     branding: {
-      productName: { type: String, default: 'ClaveSociety' },
+      productName: { type: String, default: 'Society Manager' },
       logoUrl: { type: String, default: '' },
       primaryColor: { type: String, default: '#2563EB' },
     },

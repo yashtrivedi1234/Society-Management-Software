@@ -80,11 +80,12 @@ function ensureSeed() {
       { id: 'an-1', title: 'Maintenance Reminder', message: 'Please clear pending maintenance by 15th to avoid late fee.', channel: 'whatsapp', target: 'defaulters' },
     ],
     backups: [
-      { id: 'bk-1', type: 'manual', status: 'completed', fileUrl: 'https://storage.clave.local/default/backup-1.zip', notes: 'Seed backup snapshot', createdAt: `${today}T09:00:00` },
+      { id: 'bk-1', type: 'manual', status: 'completed', fileUrl: 'https://storage.demo.local/default/backup-1.zip', notes: 'Seed backup snapshot', createdAt: `${today}T09:00:00` },
+      { id: 'bk-2', type: 'scheduled', status: 'completed', fileUrl: 'https://storage.demo.local/default/backup-2.zip', notes: 'Nightly backup', createdAt: `${today}T02:00:00` },
     ],
   };
   db.settings = {
-    branding: { productName: 'ClaveSociety', logoUrl: '', primaryColor: '#2563EB' },
+    branding: { productName: 'Society Manager', logoUrl: '', primaryColor: '#0F766E' },
     locale: 'en-IN',
     timezone: 'Asia/Kolkata',
     maintenanceConfig: { dueDay: 10, lateFeePerDay: 50 },
@@ -196,7 +197,7 @@ export function updateSettings(patch) {
   return clone(s.settings);
 }
 export function triggerBackup(payload = {}) {
-  return create('backups', { type: payload.type || 'manual', status: 'completed', fileUrl: 'https://storage.clave.local/default/backup-demo.zip', notes: payload.notes || 'Demo backup', createdAt: `${today}T12:00:00` }, 'bk');
+  return create('backups', { type: payload.type || 'manual', status: 'completed', fileUrl: 'https://storage.demo.local/default/backup-demo.zip', notes: payload.notes || 'Demo backup', createdAt: `${today}T12:00:00` }, 'bk');
 }
 export function registerDeviceToken(payload) {
   return { id: nextId('dt'), platform: payload.platform || 'web', token: payload.token || 'demo-token' };

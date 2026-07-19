@@ -45,7 +45,7 @@ export const triggerBackup = asyncHandler(async (req, res) => {
     societyId: req.societyId,
     type: req.body.type || 'manual',
     status: 'completed',
-    fileUrl: `https://storage.clave.local/${req.societyId}/backup-${randomUUID()}.zip`,
+    fileUrl: `https://storage.demo.local/${req.societyId}/backup-${randomUUID()}.zip`,
     notes: 'Backup generated successfully',
   });
   req.auditEntity = 'backup';

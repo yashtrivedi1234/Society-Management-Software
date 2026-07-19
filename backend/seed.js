@@ -11,9 +11,15 @@ import { Member } from './src/modules/members/member.model.js';
 const societyId = 'default';
 
 const accounts = [
-  { role: 'admin', name: 'Demo Admin', email: 'admin@clave.demo', password: 'Admin@123' },
-  { role: 'accountant', name: 'Demo Accountant', email: 'accountant@clave.demo', password: 'Account@123' },
-  { role: 'member', name: 'Demo Member', email: 'member@clave.demo', password: 'Member@123', flatNumber: 'A-101' },
+  { role: 'admin', name: 'Demo Admin', email: 'admin@greenvalley.demo', password: 'Admin@123' },
+  { role: 'accountant', name: 'Demo Accountant', email: 'accountant@greenvalley.demo', password: 'Account@123' },
+  { role: 'member', name: 'Demo Member', email: 'member@greenvalley.demo', password: 'Member@123', flatNumber: 'A-101' },
+];
+
+const legacyEmails = [
+  'admin@clave.demo',
+  'accountant@clave.demo',
+  'member@clave.demo',
 ];
 
 async function upsertMember(flatNumber, name, email) {
@@ -52,6 +58,11 @@ async function upsertUser({ role, name, email, password, flatNumber, memberId })
 
 async function main() {
   await connectDb();
+
+  const removed = await User.deleteMany({ email: { $in: legacyEmails } });
+  if (removed.deletedCount) {
+    console.log(`Removed ${removed.deletedCount} legacy demo user(s)`);
+  }
 
   const memberAccount = accounts.find((a) => a.role === 'member');
   const memberRecord = await upsertMember(

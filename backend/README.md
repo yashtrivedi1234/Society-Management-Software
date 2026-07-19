@@ -1,26 +1,21 @@
-# Clave Society Backend
+# Society Manager — Backend
 
-Express.js (ES Modules) + Mongoose backend for Clave Society.
+Express (ESM) + Mongoose API for the society / RWA management app.
 
 ## Setup
 
-1. Copy `.env.example` to `.env`
-2. Install dependencies:
-   - `npm install`
-3. Run dev server:
-   - `npm run dev`
+```bash
+cp .env.example .env
+npm install
+npm run seed
+npm run dev
+```
 
-## Base URL
+Base URL: `http://localhost:5000/api/v1`
 
-- `http://localhost:5000/api/v1`
+## Auth
 
-## Implemented Modules
+- `POST /auth/login` — `{ email, password }`
+- `GET /auth/me` — Bearer token
 
-- Auth: `POST /auth/register`, `POST /auth/login`, `GET /auth/me`
-- Members: CRUD endpoints under `/members`
-- Payments: list/create/mark-paid under `/payments`
-
-## Notes
-
-- Use `Authorization: Bearer <token>` for protected routes.
-- Default CORS origin is `http://localhost:5173`.
+Demo users are created by `npm run seed` (see root README).

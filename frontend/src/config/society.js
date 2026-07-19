@@ -29,10 +29,8 @@ const societyConfig = {
   accountName: "Green Valley Residency RWA",
   upiId: "greenvalley@hdfcbank",
 
-  productName: "ClaveSociety",
-  productTagline: "Smart Society Management",
-  companyName: "CodingClave",
-  companyUrl: "https://codingclave.com/products/society-management-software",
+  productName: "Society Manager",
+  productTagline: "Complete RWA & Society Operations",
 
   financialYearStart: 4,
 
